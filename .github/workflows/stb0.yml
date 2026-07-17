@@ -1,0 +1,36 @@
+name: STB-0 successful translation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - run_stb0.py
+      - test_results.py
+      - .github/workflows/stb0.yml
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install pandas numpy scipy scikit-learn matplotlib
+      - name: Download professional MQM corpora
+        run: |
+          mkdir -p data
+          curl -L --fail --retry 5 -o data/ende.tsv https://raw.githubusercontent.com/google/wmt-mqm-human-evaluation/main/newstest2020/ende/mqm_newstest2020_ende.tsv
+          curl -L --fail --retry 5 -o data/zhen.tsv https://raw.githubusercontent.com/google/wmt-mqm-human-evaluation/main/newstest2020/zhen/mqm_newstest2020_zhen.tsv
+      - name: Run STB-0
+        run: python run_stb0.py --input en-de=data/ende.tsv --input zh-en=data/zhen.tsv --out STB0_successful_translation
+      - name: Test results
+        run: python test_results.py STB0_successful_translation | tee STB0_successful_translation/results/test_output.txt
+      - name: Add sources
+        run: cp run_stb0.py test_results.py STB0_successful_translation/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: STB0_successful_translation
+          path: STB0_successful_translation
+          retention-days: 30
