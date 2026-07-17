@@ -6,6 +6,12 @@ on:
       - run_stb0.py
       - test_results.py
       - .github/workflows/stb0.yml
+  pull_request:
+    paths:
+      - run_stb0.py
+      - test_results.py
+      - .github/workflows/stb0.yml
+      - STB0_RUN.md
 jobs:
   evaluate:
     runs-on: ubuntu-latest
